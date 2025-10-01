@@ -1,0 +1,3 @@
+declare const _default: "# Escrow Topic Manager Docs\n\nTo have outputs accepted into the Escrow overlay network, use the Escrow sCrypt contract to create valid instantiations.\n\nSubmit transactions that start new escrow contracts, or spend existing ones already submitted in a valid way.\n\nThe latest state of all active escrows will be tracked, and will be available through the corresponding Escrow Lookup Service.";
+export default _default;
+//# sourceMappingURL=EscrowTopicDocs.md.d.ts.map

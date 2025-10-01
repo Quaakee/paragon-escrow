@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["jest", "node"],
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "rootDir": "../",
+    "baseUrl": "../"
+  },
+  "include": [
+    "../src/**/*.ts",
+    "../tests/**/*.ts"
+  ],
+  "exclude": [
+    "../dist",
+    "../node_modules"
+  ]
+}

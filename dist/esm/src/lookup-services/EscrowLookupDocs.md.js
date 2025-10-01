@@ -1,0 +1,6 @@
+export default `# Escrow Lookup Service
+
+To use this service, send a query that comprises a string "findAll".
+
+All UTXOs will be returned.`;
+//# sourceMappingURL=EscrowLookupDocs.md.js.map
