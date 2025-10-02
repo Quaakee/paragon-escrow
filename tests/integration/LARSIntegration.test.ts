@@ -24,7 +24,7 @@
  *    npm test -- tests/integration/LARSIntegration.test.ts
  */
 
-import { WalletClient, TopicBroadcaster, LookupResolver, Transaction, PublicKey, P2PKH } from '@bsv/sdk'
+import { WalletClient, TopicBroadcaster, LookupResolver } from '@bsv/sdk'
 import { WalletHealthChecker } from '../../src/utils/wallet-health.js'
 import Seeker from '../../src/entities/Seeker.js'
 import type { GlobalConfig, EscrowTX } from '../../src/constants.js'
@@ -62,8 +62,8 @@ const TEST_GLOBAL_CONFIG: GlobalConfig = {
 
   // Network settings - CONFIGURED FOR LOCAL LARS
   platformKey: '0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', // Dummy platform key for testing
-  topic: 'tm_escrow_lars_test', // Topic for LARS broadcasting
-  service: 'ls_escrow_lars_test', // Lookup service for LARS queries
+  topic: 'tm_escrow', // Topic for LARS broadcasting
+  service: 'ls_escrow', // Lookup service for LARS queries
   keyDerivationProtocol: [2, 'escrow v1 lars test'],
   networkPreset: 'local' // LOCAL network for LARS
 }
@@ -108,7 +108,7 @@ describe('LARS Overlay Network Integration', () => {
     // Initialize overlay network components
     try {
       // TopicBroadcaster for publishing transactions to LARS
-      broadcaster = new TopicBroadcaster([TEST_GLOBAL_CONFIG.topic], {
+      broadcaster = new TopicBroadcaster(['tm_escrow'], {
         networkPreset: TEST_GLOBAL_CONFIG.networkPreset
       })
 
@@ -309,54 +309,48 @@ describe('LARS Overlay Network Integration', () => {
       }
 
       console.log('\n🚀 Testing direct TopicBroadcaster usage...')
+      console.log('⏳ Please approve the transaction in MetaNet Desktop when prompted...\n')
 
       try {
-        // Get public key for creating P2PKH locking script
-        const { publicKey: pubKeyHex } = await wallet.getPublicKey({
-          counterparty: 'self',
-          protocolID: TEST_GLOBAL_CONFIG.keyDerivationProtocol,
-          keyID: '1'
-        })
+        // Create Seeker instance for creating escrow contract
+        const seeker = new Seeker(TEST_GLOBAL_CONFIG, wallet, broadcaster, resolver)
 
-        // Convert hex public key to PublicKey object
-        const pubKey = PublicKey.fromString(pubKeyHex)
+        // Define escrow contract parameters
+        const workDescription = 'LARS Direct Broadcast Test - Build test widget'
+        const workDeadline = Math.floor(Date.now() / 1000) + 86400 // 1 day from now
+        const bountyAmount = 5000 // satoshis
 
-        // Derive address from public key
-        const address = pubKey.toAddress()
+        console.log('📝 Creating escrow contract...')
+        console.log(`   Description: ${workDescription}`)
+        console.log(`   Deadline: ${new Date(workDeadline * 1000).toISOString()}`)
+        console.log(`   Bounty: ${bountyAmount} satoshis`)
 
-        // Create P2PKH locking script
-        const p2pkhLockingScript = new P2PKH().lock(address)
+        // Create and broadcast escrow contract
+        // The seek() method internally broadcasts to LARS via TopicBroadcaster
+        await seeker.seek(workDescription, workDeadline, bountyAmount)
 
-        // Create a simple test transaction using wallet with P2PKH
-        const { tx } = await wallet.createAction({
-          description: 'LARS Test - Direct broadcast',
-          outputs: [{
-            satoshis: 1,
-            lockingScript: p2pkhLockingScript.toHex(),
-            outputDescription: 'Test P2PKH output for LARS broadcasting'
-          }]
-        })
+        console.log('✅ Direct broadcast successful via TopicBroadcaster')
 
-        if (!tx) {
-          throw new Error('Transaction data missing from wallet action')
-        }
+        // Verify the contract was created by querying the overlay network
+        const contracts: EscrowTX[] = await seeker.getMyOpenContracts()
 
-        // Convert to Transaction object
-        const transaction = Transaction.fromAtomicBEEF(tx)
+        console.log(`✅ Found ${contracts.length} contract(s) in overlay network`)
 
-        console.log(`   Transaction ID: ${transaction.id('hex')}`)
+        // Verify we have at least the contract we just created
+        expect(contracts.length).toBeGreaterThanOrEqual(1)
 
-        // Broadcast to LARS via TopicBroadcaster
-        const broadcastResult = await broadcaster.broadcast(transaction)
-
-        console.log('✅ Direct broadcast successful')
-        console.log(`   Status: ${broadcastResult.status}`)
-        console.log(`   TXID: ${broadcastResult.txid}\n`)
+        // Get the most recent contract
+        const latestContract = contracts[contracts.length - 1]
 
         // Verify broadcast result
-        expect(broadcastResult).toBeDefined()
-        expect(broadcastResult.status).toBeDefined()
-        expect(broadcastResult.txid).toBeDefined()
+        expect(latestContract).toBeDefined()
+        expect(latestContract.record).toBeDefined()
+        expect(latestContract.record.txid).toBeDefined()
+
+        console.log(`   TXID: ${latestContract.record.txid}`)
+        console.log(`   Output Index: ${latestContract.record.outputIndex}`)
+        console.log(`   Status: ${latestContract.record.status}\n`)
+
       } catch (error) {
         if (error instanceof Error && (
           error.message.includes('LARS') ||
@@ -373,7 +367,7 @@ describe('LARS Overlay Network Integration', () => {
           throw error
         }
       }
-    }, 60000)
+    }, 300000) // 5 minute timeout for user to approve transaction in MetaNet Desktop
 
     it('should query overlay network using LookupResolver directly', async () => {
       if (!isMetaNetAvailable || !isLARSAvailable) {
