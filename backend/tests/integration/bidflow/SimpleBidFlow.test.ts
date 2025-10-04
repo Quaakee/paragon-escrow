@@ -99,14 +99,14 @@ describe('Simple Bid Flow', () => {
     console.log(`   Bond: ${bond} satoshis\n`)
 
     await waitForPropagation(2)
-
+    debugger
     // STEP 4: Seeker views the bid on their contract
     console.log('👀 STEP 4: Seeker viewing bids on their contract...')
     const seekerContracts = await seeker.getMyOpenContracts()
     console.log(`Found ${seekerContracts.length} contracts for seeker`)
     const updatedContract = seekerContracts.find((w: EscrowTX) => w.record.workDescription === workDescriptionHex)
     expect(updatedContract).toBeDefined()
-
+    debugger
     // CRITICAL: Verify contract value stayed at 1 satoshi for TYPE_BID
     expect(updatedContract!.satoshis).toBe(1)
     console.log('✅ Contract value correctly stayed at 1 satoshi (TYPE_BID behavior)')

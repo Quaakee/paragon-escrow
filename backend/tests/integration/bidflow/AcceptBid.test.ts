@@ -110,13 +110,14 @@ describe('Accept Bid Flow', () => {
     console.log('👍 STEP 3: Seeker accepting the bid...')
 
     // Get fresh contract with bid included
+    debugger
     const seekerContracts = await seeker.getMyOpenContracts()
     const contractWithBid = seekerContracts.find((w: EscrowTX) => w.record.workDescription === workDescriptionHex)
     expect(contractWithBid).toBeDefined()
 
     // Verify contract still at 1 satoshi (TYPE_BID during bidding)
     expect(contractWithBid!.satoshis).toBe(1)
-
+    debugger
     // Find the bid that was placed
     const realBids = contractWithBid!.record.bids.filter((b: any) => b.bidAmount > 0)
     expect(realBids.length).toBeGreaterThanOrEqual(1)
