@@ -40,6 +40,7 @@ export default class Seeker {
     bounty: number = 1
   ): Promise<void> {
     await this.populateDerivedPublicKey()
+
     const escrow = contractFromGlobalConfigAndParams(
       this.globalConfig,
       this.derivedPublicKey!,
