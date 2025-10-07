@@ -151,7 +151,7 @@ export const callContractMethod = async (
     params: Array<any>,
     nextOutputAmount?: number,
     otherOutputs?: Array<CreateActionOutput>,
-    sequenceNumber: number = 0xffffffff,
+    sequenceNumber: number = 0xfffffffe,
     lockTime: number = 0,
     unlockingScriptLength = 1200000
 ) => {

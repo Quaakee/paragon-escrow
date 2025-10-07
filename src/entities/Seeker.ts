@@ -37,11 +37,17 @@ export default class Seeker {
   async seek (
     workDescription: string,
     workCompletionDeadline: number,
-    bounty: number = 1
+    bounty: number = 1,
+    contractType: 'bid' | 'bounty' = 'bounty'
   ): Promise<void> {
     await this.populateDerivedPublicKey()
+    // Override global config with the specified contract type
+    const configWithContractType = {
+      ...this.globalConfig,
+      contractType
+    }
     const escrow = contractFromGlobalConfigAndParams(
-      this.globalConfig,
+      configWithContractType,
       this.derivedPublicKey!,
       workDescription,
       workCompletionDeadline
@@ -50,7 +56,7 @@ export default class Seeker {
       description: workDescription,
       outputs: [{
         outputDescription: 'Work completion contract',
-        satoshis: this.globalConfig.contractType === 'bounty' ? bounty : 1,
+        satoshis: contractType === 'bounty' ? bounty : 1,
         lockingScript: escrow.lockingScript.toHex()
       }]
     })

@@ -42,15 +42,16 @@ export default class Furnisher {
     }
     async placeBid(escrow, amount, plans, timeRequired, bond) {
         await this.populateDerivedPublicKey();
+        const lockTime = await this.getCurrentLockTime();
         const bid = {
             furnisherKey: PubKey(this.derivedPublicKey),
             plans: toByteString(plans, true),
             bidAmount: BigInt(amount),
             bond: BigInt(bond),
             timeRequired: BigInt(timeRequired),
-            timeOfBid: BigInt(await this.getCurrentLockTime())
+            timeOfBid: BigInt(lockTime)
         };
-        const { tx } = await callContractMethod(this.wallet, escrow, 'furnisherPlacesBid', [this.signatory(), bid, escrow.contract.bids.findIndex(x => x.furnisherKey === escrow.contract.seekerKey)], escrow.satoshis);
+        const { tx } = await callContractMethod(this.wallet, escrow, 'furnisherPlacesBid', [this.signatory(), bid, escrow.contract.bids.findIndex(x => x.furnisherKey === escrow.contract.seekerKey)], escrow.satoshis, undefined, undefined, lockTime);
         if (!tx)
             throw new Error('Transaction data missing from sign action result');
         await this.broadcaster.broadcast(Transaction.fromAtomicBEEF(tx));

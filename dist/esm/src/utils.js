@@ -117,7 +117,7 @@ export const contractFromGlobalConfigAndParams = (config, seekerKey, workDescrip
         timeRequired: 0n
     }, 4));
 };
-export const callContractMethod = async (wallet, escrow, methodName, params, nextOutputAmount, otherOutputs, sequenceNumber = 0xffffffff, lockTime = 0, unlockingScriptLength = 1200000) => {
+export const callContractMethod = async (wallet, escrow, methodName, params, nextOutputAmount, otherOutputs, sequenceNumber = 0xfffffffe, lockTime = 0, unlockingScriptLength = 1200000) => {
     // Compute blank signatures for use at first until signatories are called
     const blankedParams = params.map((x) => typeof x === 'function' || x === 'WONTSIGN' ? blankSig : x);
     escrow.contract.to = {
