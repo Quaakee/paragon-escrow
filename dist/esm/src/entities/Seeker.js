@@ -31,14 +31,19 @@ export default class Seeker {
             this.resolver = resolver;
         }
     }
-    async seek(workDescription, workCompletionDeadline, bounty = 1) {
+    async seek(workDescription, workCompletionDeadline, bounty = 1, contractType = 'bounty') {
         await this.populateDerivedPublicKey();
-        const escrow = contractFromGlobalConfigAndParams(this.globalConfig, this.derivedPublicKey, workDescription, workCompletionDeadline);
+        // Override global config with the specified contract type
+        const configWithContractType = {
+            ...this.globalConfig,
+            contractType
+        };
+        const escrow = contractFromGlobalConfigAndParams(configWithContractType, this.derivedPublicKey, workDescription, workCompletionDeadline);
         const { tx } = await this.wallet.createAction({
             description: workDescription,
             outputs: [{
                     outputDescription: 'Work completion contract',
-                    satoshis: this.globalConfig.contractType === 'bounty' ? bounty : 1,
+                    satoshis: contractType === 'bounty' ? bounty : 1,
                     lockingScript: escrow.lockingScript.toHex()
                 }]
         });
@@ -71,7 +76,7 @@ export default class Seeker {
         await this.broadcaster.broadcast(Transaction.fromAtomicBEEF(tx));
     }
     async acceptBid(escrow, bidIndex) {
-        const { tx } = await callContractMethod(this.wallet, escrow, 'acceptBid', [EscrowContract.BID_ACCEPTED_BY_SEEKER, this.signatory(), BigInt(bidIndex)], escrow.contract.contractType === EscrowContract.TYPE_BID
+        const { tx } = await callContractMethod(this.wallet, escrow, 'acceptBid', [EscrowContract.FURNISHER_APPROVAL_MODE_SEEKER, this.signatory(), BigInt(bidIndex)], escrow.contract.contractType === EscrowContract.TYPE_BID
             ? Number(escrow.contract.bids[bidIndex].bidAmount)
             : escrow.satoshis);
         if (!tx)

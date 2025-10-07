@@ -105,7 +105,7 @@ export default class Seeker {
       this.wallet,
       escrow,
       'acceptBid',
-      [EscrowContract.BID_ACCEPTED_BY_SEEKER, this.signatory(), BigInt(bidIndex)],
+      [EscrowContract.FURNISHER_APPROVAL_MODE_SEEKER, this.signatory(), BigInt(bidIndex)],
       escrow.contract.contractType === EscrowContract.TYPE_BID
         ? Number(escrow.contract.bids[bidIndex].bidAmount)
         : escrow.satoshis

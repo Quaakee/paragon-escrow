@@ -7,7 +7,7 @@ export default class Seeker {
     private readonly broadcaster;
     private readonly resolver;
     constructor(globalConfig: GlobalConfig, wallet?: WalletInterface, broadcaster?: TopicBroadcaster | 'DEFAULT', resolver?: LookupResolver | 'DEFAULT');
-    seek(workDescription: string, workCompletionDeadline: number, bounty?: number): Promise<void>;
+    seek(workDescription: string, workCompletionDeadline: number, bounty?: number, contractType?: 'bid' | 'bounty'): Promise<void>;
     getMyOpenContracts(): Promise<EscrowTX[]>;
     cancelBeforeAccept(escrow: EscrowTX): Promise<void>;
     increaseBounty(escrow: EscrowTX, increaseBy: number): Promise<void>;

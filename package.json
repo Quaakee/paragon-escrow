@@ -29,7 +29,9 @@
     "build": "tsc -b",
     "prepublish": "npm run build",
     "compile": "scrypt-cli c",
-    "doc": "ts2md --inputFilename=mod.ts --outputFilename=API.md --filenameSubstring=API --firstHeadingLevel=1"
+    "doc": "ts2md --inputFilename=mod.ts --outputFilename=API.md --filenameSubstring=API --firstHeadingLevel=1",
+    "run:accept-bid": "tsx src/scripts/acceptBidFlow.ts",
+    "accept-bid": "node dist/esm/src/scripts/acceptBidFlow.js"
   },
   "author": "BSV Association",
   "license": "SEE LICENSE IN LICENSE.txt",
@@ -41,6 +43,7 @@
     "ts-standard": "^12.0.2",
     "ts2md": "^0.2.0",
     "tsconfig-to-dual-package": "^1.2.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.2.2"
   },
   "dependencies": {
